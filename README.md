@@ -4,7 +4,7 @@ Me Time is a small hotel ordering platform for menu management, hotel-specific c
 
 ## What is included
 
-The hotel portal at `/` lets staff create or reopen a hotel workspace, add or remove menu items, and see the active hotel’s order queue. The public customer menu is `/customer.html?hotel=<hotel-slug>`; customers can select menu items, add a room/table number, and send a persistent order to that hotel. The staff board is `/customers.html?hotel=<hotel-slug>`; it shows only that hotel’s customer orders and lets staff mark each order seen/unseen and move it through `new`, `preparing`, `ready`, `completed`, or `cancelled`.
+The hotel portal at `/` lets staff create or reopen a hotel workspace, add or remove menu items, and see the active hotel’s order queue. When a staff member adds a menu item without a custom image URL, the browser automatically creates a food-photo prompt from the exact product name and stores the generated menu image URL with that product. Staff can disable this or supply their own image URL. The public customer menu is `/customer.html?hotel=<hotel-slug>`; customers can select menu items, add a room/table number, and send a persistent order to that hotel. The staff board is `/customers.html?hotel=<hotel-slug>`; it shows only that hotel’s customer orders and lets staff mark each order seen/unseen and move it through `new`, `preparing`, `ready`, `completed`, or `cancelled`.
 
 The API lives in `api/index.js` and exposes `/api/health`, hotel creation/lookup, product CRUD, order creation/listing, and order `PATCH` updates. Order items snapshot the name and price at checkout, so later menu edits do not rewrite history.
 

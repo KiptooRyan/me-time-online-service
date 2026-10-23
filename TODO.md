@@ -10,6 +10,7 @@
 
 - [x] Let a hotel identify itself with its name and phone and reopen the same hotel session on the device.
 - [x] Let hotel staff add and delete menu products with name, Ksh price, and optional image URL.
+- [x] Generate a menu image from the exact product name when staff add an item without a custom image URL.
 - [x] Show the active hotel context and summary counts in the staff portal.
 
 ## Customer ordering page

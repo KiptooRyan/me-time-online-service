@@ -87,7 +87,8 @@
             <div class="toolbar"><div><div class="eyebrow">Menu studio</div><h2>What can guests order?</h2><p class="order-meta">Add a clear name, Ksh price, and optional image.</p></div></div>
             <form id="product-form" class="form-grid" style="margin-top:20px">
               <div class="field"><label for="product-name">Product name</label><input id="product-name" required placeholder="e.g. Grilled tilapia plate"></div>
-              <div class="form-grid" style="grid-template-columns:1fr 1fr"><div class="field"><label for="product-price">Price (Ksh)</label><input id="product-price" required min="0" step="1" type="number" placeholder="1450"></div><div class="field"><label for="product-image">Image URL (optional)</label><input id="product-image" type="url" placeholder="https://…"></div></div>
+              <div class="form-grid" style="grid-template-columns:1fr 1fr"><div class="field"><label for="product-price">Price (Ksh)</label><input id="product-price" required min="0" step="1" type="number" placeholder="1450"></div><div class="field"><label for="product-image">Custom image URL (optional)</label><input id="product-image" type="url" placeholder="https://…"></div></div>
+              <label class="context-chip" style="width:max-content; cursor:pointer"><input id="product-auto-image" type="checkbox" checked style="width:auto; margin:0"> Generate a menu image from the product name</label>
               <button class="btn btn-primary" type="submit">Add to hotel menu</button>
             </form>
             <div id="product-grid" class="product-grid"></div>

@@ -16,6 +16,11 @@ async function api(path, options = {}) {
 
 function money(value) { return `Ksh ${Number(value || 0).toLocaleString('en-KE')}`; }
 function escapeText(value) { return String(value ?? ''); }
+function imageSeed(value) { return [...String(value)].reduce((sum, character) => ((sum * 31) + character.charCodeAt(0)) >>> 0, 7); }
+function generatedMenuImage(name) {
+  const prompt = `appetizing professional editorial food photograph of ${name}, freshly plated for a boutique hotel menu, natural window light, warm neutral table, shallow depth of field, no text, no logos`;
+  return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=768&height=512&nologo=true&seed=${imageSeed(name)}`;
+}
 function slugFromQuery() { return new URLSearchParams(location.search).get('hotel'); }
 function getSession() { try { return JSON.parse(localStorage.getItem(sessionKey) || 'null'); } catch { return null; } }
 function setSession(hotel) { localStorage.setItem(sessionKey, JSON.stringify(hotel)); }
@@ -147,7 +152,10 @@ async function initHotelPortal() {
     event.preventDefault(); clearNotice($('#dashboard-notice'));
     const form = event.currentTarget; const button = $('button[type="submit"]', form); button.disabled = true;
     try {
-      await api('products', { method: 'POST', body: { hotelId: hotel.id, name: $('#product-name').value, price: Number($('#product-price').value), imageUrl: $('#product-image').value } });
+      const productName = $('#product-name').value.trim();
+      const customImage = $('#product-image').value.trim();
+      const imageUrl = customImage || ($('#product-auto-image').checked ? generatedMenuImage(productName) : '');
+      await api('products', { method: 'POST', body: { hotelId: hotel.id, name: productName, price: Number($('#product-price').value), imageUrl } });
       form.reset(); showNotice($('#dashboard-notice'), 'Menu item added.', 'success'); loadDashboard();
     } catch (error) { showNotice($('#dashboard-notice'), error.message); }
     finally { button.disabled = false; }
