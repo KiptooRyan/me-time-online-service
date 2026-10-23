@@ -1,160 +1,106 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Hotel Order System - Add Products</title>
-<style>
-* { margin:0; padding:0; box-sizing:border-box; font-family: Arial; }
-body {
-  min-height:100vh;
-  background: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1470');
-  background-size: cover; background-position: center; background-attachment: fixed;
-  display:flex; align-items:center; justify-content:center; padding:15px;
-}
-.card { background:white; width:100%; max-width:480px; border-radius:15px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.4); }
-h2 { text-align:center; color:#d35400; }
-.subtitle { text-align:center; color:#777; font-size:12px; margin-bottom:15px; }
-input, button { width:100%; padding:11px; margin:6px 0; border-radius:8px; border:1px solid #ddd; font-size:14px; }
-button { background:#e67e22; color:white; border:none; font-weight:bold; cursor:pointer; }
-button.green { background:#27ae60; }
-button.grey { background:#95a5a6; }
-button.red { background:#e74c3c; width:auto; padding:5px 10px; font-size:12px; }
-.hidden { display:none; }
-.tabs { display:flex; gap:5px; margin:10px 0; }
-.tabs button { flex:1; }
-.activeTab { background:#d35400!important; }
-.food-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
-.food-item { border:1px solid #eee; border-radius:10px; padding:8px; text-align:center; background:#fffaf5; position:relative; }
-.food-item img { width:100%; height:85px; object-fit:cover; border-radius:8px; }
-.price { color:#27ae60; font-weight:bold; }
-.add-box { background:#fef9f2; border:2px dashed #e67e22; padding:12px; border-radius:10px; margin:10px 0; }
-.preview-img { width:100%; height:120px; object-fit:cover; border-radius:8px; margin-top:5px; display:none; }
-.order-box { background:#f4f4f4; padding:10px; border-radius:8px; margin-top:10px; font-size:13px; }
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Me Time hotel portal for menus and room-service orders.">
+  <title>Me Time · Hotel portal</title>
+  <link rel="stylesheet" href="/styles.css">
 </head>
-<body>
+<body data-page="hotel">
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark">⌂</span>
+        <span>Me Time <small>hotel ordering</small></span>
+      </a>
+      <div class="top-actions">
+        <a class="btn btn-ghost" data-hotel-link="/customer.html" href="/customer.html">Customer link</a>
+        <a class="btn btn-soft" data-hotel-link="/customers.html" href="/customers.html">Order board</a>
+      </div>
+    </header>
 
-<!-- LOGIN -->
-<div class="card" id="loginPage">
-  <h2>🍛 HOTEL LOGIN</h2>
-  <p class="subtitle">Hotel Name + Phone to manage menu</p>
-  <input type="text" id="hotelName" placeholder="Hotel Name e.g. Tenges Hotel">
-  <input type="tel" id="phone" placeholder="Phone Number e.g. 0792343784">
-  <button onclick="loginHotel()">Login Hotel</button>
-</div>
+    <main id="login-view">
+      <section class="hero">
+        <div>
+          <div class="context"><span class="eyebrow">Digital front desk</span><span class="context-chip">Menus · orders · visibility</span></div>
+          <h1>Your hotel, in one clean shift view.</h1>
+          <p class="lede">Create a beautiful menu, share a hotel-specific ordering link, and keep every customer order visible from first tap to completion.</p>
+        </div>
+        <aside class="hero-card">
+          <div class="eyebrow">Built for the floor</div>
+          <h2>Less chasing. More serving.</h2>
+          <p>New orders land in a focused hotel board. Mark them seen, move them through service, and keep staff aligned in real time.</p>
+          <a class="btn btn-primary" href="#portal">Open the staff portal</a>
+        </aside>
+      </section>
+      <section id="portal" class="auth-layout">
+        <div class="auth-story">
+          <div class="eyebrow">Hotel access</div>
+          <h2>Set up your service desk in minutes.</h2>
+          <p>Use the same hotel name and phone to reopen your portal on this device. The hotel slug becomes your shareable customer link.</p>
+          <ul class="feature-list">
+            <li><span>✓</span>Manage menu items and prices</li>
+            <li><span>✓</span>Receive room and table orders</li>
+            <li><span>✓</span>Mark orders seen and update status</li>
+          </ul>
+        </div>
+        <div class="card panel">
+          <div class="eyebrow">Start a hotel workspace</div>
+          <h2>Open your portal</h2>
+          <p class="lede">Returning hotel? Use the exact same phone number to pick up where you left off.</p>
+          <div id="login-notice" class="notice"></div>
+          <form id="login-form" class="form-grid">
+            <div class="field"><label for="hotel-name">Hotel name</label><input id="hotel-name" required placeholder="e.g. Saffron Garden Hotel"></div>
+            <div class="field"><label for="hotel-phone">Phone number</label><input id="hotel-phone" required type="tel" placeholder="e.g. +254 700 000 000"></div>
+            <button class="btn btn-primary btn-block" type="submit">Open hotel portal</button>
+          </form>
+          <p class="order-meta" style="margin:16px 0 0">By continuing, you create or reopen a hotel workspace. For production, add staff authentication before sharing access widely.</p>
+        </div>
+      </section>
+    </main>
 
-<!-- DASHBOARD -->
-<div class="card hidden" id="dashPage">
-  <h2 id="welcomeHotel">Welcome</h2>
-  <p class="subtitle" id="welcomePhone"></p>
-
-  <div class="tabs">
-    <button id="tab1" class="activeTab" onclick="switchTab('manage')">Manage Menu</button>
-    <button id="tab2" onclick="switchTab('orders')">Take Orders</button>
+    <main id="dashboard-view" hidden>
+      <section class="page-header">
+        <div><div class="eyebrow">Staff portal</div><h1>Good shift, <span data-hotel-name>hotel</span>.</h1><p><span class="hotel-badge">Active hotel <span data-hotel-slug></span></span></p></div>
+        <div class="top-actions"><button id="logout" class="btn btn-ghost">Switch hotel</button></div>
+      </section>
+      <div id="dashboard-notice" class="notice"></div>
+      <section class="stats">
+        <div class="card stat"><div class="stat-label">Menu items</div><div class="stat-value stat-accent" data-product-count>0</div></div>
+        <div class="card stat"><div class="stat-label">Orders received</div><div class="stat-value" data-order-count>0</div></div>
+        <div class="card stat"><div class="stat-label">Waiting to be seen</div><div class="stat-value" data-unseen-count>0</div></div>
+      </section>
+      <div class="dashboard">
+        <aside class="card rail">
+          <div class="eyebrow">Hotel desk</div>
+          <p class="order-meta" style="margin:8px 0 18px">Keep this hotel context selected while you work.</p>
+          <nav class="rail-nav">
+            <button class="active" data-section="menu-section">Menu</button>
+            <button data-section="portal-orders-section">Orders</button>
+            <a class="btn btn-soft btn-block btn-small" data-hotel-link="/customers.html" href="/customers.html">Open customer board</a>
+          </nav>
+          <div class="rail-note">Share the customer ordering link only after opening it once so you can confirm the active hotel name.</div>
+        </aside>
+        <div>
+          <section id="menu-section" class="card panel section active">
+            <div class="toolbar"><div><div class="eyebrow">Menu studio</div><h2>What can guests order?</h2><p class="order-meta">Add a clear name, Ksh price, and optional image.</p></div></div>
+            <form id="product-form" class="form-grid" style="margin-top:20px">
+              <div class="field"><label for="product-name">Product name</label><input id="product-name" required placeholder="e.g. Grilled tilapia plate"></div>
+              <div class="form-grid" style="grid-template-columns:1fr 1fr"><div class="field"><label for="product-price">Price (Ksh)</label><input id="product-price" required min="0" step="1" type="number" placeholder="1450"></div><div class="field"><label for="product-image">Image URL (optional)</label><input id="product-image" type="url" placeholder="https://…"></div></div>
+              <button class="btn btn-primary" type="submit">Add to hotel menu</button>
+            </form>
+            <div id="product-grid" class="product-grid"></div>
+          </section>
+          <section id="portal-orders-section" class="card panel section">
+            <div class="toolbar"><div><div class="eyebrow">Live service queue</div><h2>Orders for this hotel</h2><p class="order-meta">Seen is explicit. Status keeps everyone moving.</p></div><a class="btn btn-soft btn-small" data-hotel-link="/customers.html" href="/customers.html">Full board</a></div>
+            <div id="portal-orders" class="order-list"></div>
+          </section>
+        </div>
+      </div>
+    </main>
+    <footer class="footer">Me Time hotel ordering · Designed for calm service shifts</footer>
   </div>
-
-  <!-- TAB 1: HOTEL ADDS PRODUCTS -->
-  <div id="manageTab">
-    <div class="add-box">
-      <h4>➕ Add New Food / Product</h4>
-      <input type="text" id="pName" placeholder="Food name e.g. Ugali Fish">
-      <input type="number" id="pPrice" placeholder="Price Ksh e.g. 350">
-      <input type="text" id="pImage" placeholder="Paste Image Link OR choose file below">
-      <input type="file" id="pFile" accept="image/*" onchange="previewFile()">
-      <img id="preview" class="preview-img">
-      <button class="green" onclick="addProduct()">Add to Menu ✅</button>
-    </div>
-    <h4>Your Menu (<span id="count">0</span> items)</h4>
-    <div id="hotelMenuList" class="order-box">No products yet. Add one above.</div>
-  </div>
-
-  <!-- TAB 2: CUSTOMER ORDERING -->
-  <div id="ordersTab" class="hidden">
-    <input type="text" id="custName" placeholder="Customer Name">
-    <input type="text" id="tableNo" placeholder="Table / Room No">
-    <div id="customerMenu" class="food-grid"></div>
-    <div class="order-box" id="orderList">No orders yet</div>
-    <h3 id="total">Total: Ksh 0</h3>
-    <button class="green" onclick="placeOrder()">Place Order & Send to Hotel</button>
-  </div>
-
-  <button class="grey" onclick="logout()" style="margin-top:10px;">Logout</button>
-</div>
-
-<script>
-let products = JSON.parse(localStorage.getItem('hotel_products') || '[]');
-let orders = []; let total = 0; let currentImageData = '';
-
-function loginHotel(){
-  let name = hotelName.value.trim(), phoneVal = phone.value.trim();
-  if(!name ||!phoneVal){ alert('Enter Hotel Name & Phone'); return; }
-  localStorage.setItem('hotelName', name); localStorage.setItem('hotelPhone', phoneVal);
-  showDash(name, phoneVal);
-}
-function showDash(name, phoneVal){
-  loginPage.classList.add('hidden'); dashPage.classList.remove('hidden');
-  welcomeHotel.innerText = '🏨 ' + name; welcomePhone.innerText = phoneVal;
-  renderHotelList(); renderCustomerMenu();
-}
-function switchTab(t){
-  if(t=='manage'){ manageTab.classList.remove('hidden'); ordersTab.classList.add('hidden'); tab1.classList.add('activeTab'); tab2.classList.remove('activeTab'); }
-  else { ordersTab.classList.remove('hidden'); manageTab.classList.add('hidden'); tab2.classList.add('activeTab'); tab1.classList.remove('activeTab'); renderCustomerMenu(); }
-}
-function previewFile(){
-  let file = pFile.files[0];
-  if(!file) return;
-  let reader = new FileReader();
-  reader.onload = e => { currentImageData = e.target.result; preview.src = currentImageData; preview.style.display='block'; }
-  reader.readAsDataURL(file);
-}
-function addProduct(){
-  let name = pName.value.trim(), price = parseInt(pPrice.value), img = pImage.value.trim() || currentImageData;
-  if(!name ||!price){ alert('Enter Name & Price'); return; }
-  if(!img){ img = 'https://images.unsplash.com/photo-1547592180-85f173990554?w=400'; }
-  products.push({id:Date.now(), name, price, img});
-  localStorage.setItem('hotel_products', JSON.stringify(products));
-  pName.value=''; pPrice.value=''; pImage.value=''; pFile.value=''; preview.style.display='none'; currentImageData='';
-  renderHotelList(); renderCustomerMenu();
-  alert(name + ' added!');
-}
-function renderHotelList(){
-  count.innerText = products.length;
-  if(products.length==0){ hotelMenuList.innerHTML='No products yet'; return; }
-  let h=''; products.forEach(p=>{ h+=`<div style="display:flex; justify-content:space-between; align-items:center; margin:5px 0; border-bottom:1px solid #ddd; padding:5px 0;">${p.name} - Ksh ${p.price} <button class="red" onclick="deleteProd(${p.id})">X</button></div>` });
-  hotelMenuList.innerHTML=h;
-}
-function deleteProd(id){
-  products = products.filter(p=>p.id!=id);
-  localStorage.setItem('hotel_products', JSON.stringify(products));
-  renderHotelList(); renderCustomerMenu();
-}
-function renderCustomerMenu(){
-  let div = document.getElementById('customerMenu');
-  if(products.length==0){ div.innerHTML='<p style="grid-column:1/3; text-align:center; color:#999;">Hotel has not added food yet. Go to Manage Menu.</p>'; return; }
-  let h=''; products.forEach(p=>{
-    h+=`<div class="food-item"><img src="${p.img}"><div>${p.name}</div><div class="price">Ksh ${p.price}</div><button onclick="addOrder('${p.name}',${p.price})">Add</button></div>`;
-  });
-  div.innerHTML=h;
-}
-function addOrder(name, price){
-  if(!custName.value){ alert('Enter Customer Name'); return; }
-  orders.push({name, price}); total+=price; renderOrders();
-}
-function renderOrders(){
-  if(orders.length==0){ orderList.innerHTML='No orders yet'; total=0; }
-  else { let html=''; orders.forEach((o,i)=> html+=`${i+1}. ${o.name} - ${o.price}<br>`); orderList.innerHTML=html; }
-  document.getElementById('total').innerText='Total: Ksh '+total;
-}
-function placeOrder(){
-  if(orders.length==0){ alert('Add food'); return; }
-  alert(`ORDER SENT!\nHotel: ${localStorage.getItem('hotelName')}\nCustomer: ${custName.value}\nTable: ${tableNo.value}\nTotal: Ksh ${total}\n\nWill be sent to: ${localStorage.getItem('hotelPhone')}`);
-  orders=[]; total=0; renderOrders(); custName.value=''; tableNo.value='';
-}
-function logout(){ dashPage.classList.add('hidden'); loginPage.classList.remove('hidden'); }
-
-// Auto login
-let saved = localStorage.getItem('hotelName');
-if(saved) showDash(saved, localStorage.getItem('hotelPhone'));
-</script>
+  <script src="/app.js" defer></script>
 </body>
 </html>

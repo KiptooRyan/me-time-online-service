@@ -1,0 +1,19 @@
+{
+  "name": "me-time-online-service",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hotel menu, customer ordering, and order visibility platform.",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "check": "node --check api/index.js && node --check db.js && node --check server.js && node --check app.js",
+    "db:setup": "node -e \"require('./db').ensureSchema().then(() => console.log('Database schema ready')).catch((error) => { console.error(error); process.exit(1); })\""
+  },
+  "dependencies": {
+    "@libsql/client": "^0.15.9"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
