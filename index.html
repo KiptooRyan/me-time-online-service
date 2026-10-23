@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hotel Order System - Add Products</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family: Arial; }
+body {
+  min-height:100vh;
+  background: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1470');
+  background-size: cover; background-position: center; background-attachment: fixed;
+  display:flex; align-items:center; justify-content:center; padding:15px;
+}
+.card { background:white; width:100%; max-width:480px; border-radius:15px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.4); }
+h2 { text-align:center; color:#d35400; }
+.subtitle { text-align:center; color:#777; font-size:12px; margin-bottom:15px; }
+input, button { width:100%; padding:11px; margin:6px 0; border-radius:8px; border:1px solid #ddd; font-size:14px; }
+button { background:#e67e22; color:white; border:none; font-weight:bold; cursor:pointer; }
+button.green { background:#27ae60; }
+button.grey { background:#95a5a6; }
+button.red { background:#e74c3c; width:auto; padding:5px 10px; font-size:12px; }
+.hidden { display:none; }
+.tabs { display:flex; gap:5px; margin:10px 0; }
+.tabs button { flex:1; }
+.activeTab { background:#d35400!important; }
+.food-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px; }
+.food-item { border:1px solid #eee; border-radius:10px; padding:8px; text-align:center; background:#fffaf5; position:relative; }
+.food-item img { width:100%; height:85px; object-fit:cover; border-radius:8px; }
+.price { color:#27ae60; font-weight:bold; }
+.add-box { background:#fef9f2; border:2px dashed #e67e22; padding:12px; border-radius:10px; margin:10px 0; }
+.preview-img { width:100%; height:120px; object-fit:cover; border-radius:8px; margin-top:5px; display:none; }
+.order-box { background:#f4f4f4; padding:10px; border-radius:8px; margin-top:10px; font-size:13px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="card" id="loginPage">
+  <h2>🍛 HOTEL LOGIN</h2>
+  <p class="subtitle">Hotel Name + Phone to manage menu</p>
+  <input type="text" id="hotelName" placeholder="Hotel Name e.g. Tenges Hotel">
+  <input type="tel" id="phone" placeholder="Phone Number e.g. 0792343784">
+  <button onclick="loginHotel()">Login Hotel</button>
+</div>
+
+<!-- DASHBOARD -->
+<div class="card hidden" id="dashPage">
+  <h2 id="welcomeHotel">Welcome</h2>
+  <p class="subtitle" id="welcomePhone"></p>
+
+  <div class="tabs">
+    <button id="tab1" class="activeTab" onclick="switchTab('manage')">Manage Menu</button>
+    <button id="tab2" onclick="switchTab('orders')">Take Orders</button>
+  </div>
+
+  <!-- TAB 1: HOTEL ADDS PRODUCTS -->
+  <div id="manageTab">
+    <div class="add-box">
+      <h4>➕ Add New Food / Product</h4>
+      <input type="text" id="pName" placeholder="Food name e.g. Ugali Fish">
+      <input type="number" id="pPrice" placeholder="Price Ksh e.g. 350">
+      <input type="text" id="pImage" placeholder="Paste Image Link OR choose file below">
+      <input type="file" id="pFile" accept="image/*" onchange="previewFile()">
+      <img id="preview" class="preview-img">
+      <button class="green" onclick="addProduct()">Add to Menu ✅</button>
+    </div>
+    <h4>Your Menu (<span id="count">0</span> items)</h4>
+    <div id="hotelMenuList" class="order-box">No products yet. Add one above.</div>
+  </div>
+
+  <!-- TAB 2: CUSTOMER ORDERING -->
+  <div id="ordersTab" class="hidden">
+    <input type="text" id="custName" placeholder="Customer Name">
+    <input type="text" id="tableNo" placeholder="Table / Room No">
+    <div id="customerMenu" class="food-grid"></div>
+    <div class="order-box" id="orderList">No orders yet</div>
+    <h3 id="total">Total: Ksh 0</h3>
+    <button class="green" onclick="placeOrder()">Place Order & Send to Hotel</button>
+  </div>
+
+  <button class="grey" onclick="logout()" style="margin-top:10px;">Logout</button>
+</div>
+
+<script>
+let products = JSON.parse(localStorage.getItem('hotel_products') || '[]');
+let orders = []; let total = 0; let currentImageData = '';
+
+function loginHotel(){
+  let name = hotelName.value.trim(), phoneVal = phone.value.trim();
+  if(!name ||!phoneVal){ alert('Enter Hotel Name & Phone'); return; }
+  localStorage.setItem('hotelName', name); localStorage.setItem('hotelPhone', phoneVal);
+  showDash(name, phoneVal);
+}
+function showDash(name, phoneVal){
+  loginPage.classList.add('hidden'); dashPage.classList.remove('hidden');
+  welcomeHotel.innerText = '🏨 ' + name; welcomePhone.innerText = phoneVal;
+  renderHotelList(); renderCustomerMenu();
+}
+function switchTab(t){
+  if(t=='manage'){ manageTab.classList.remove('hidden'); ordersTab.classList.add('hidden'); tab1.classList.add('activeTab'); tab2.classList.remove('activeTab'); }
+  else { ordersTab.classList.remove('hidden'); manageTab.classList.add('hidden'); tab2.classList.add('activeTab'); tab1.classList.remove('activeTab'); renderCustomerMenu(); }
+}
+function previewFile(){
+  let file = pFile.files[0];
+  if(!file) return;
+  let reader = new FileReader();
+  reader.onload = e => { currentImageData = e.target.result; preview.src = currentImageData; preview.style.display='block'; }
+  reader.readAsDataURL(file);
+}
+function addProduct(){
+  let name = pName.value.trim(), price = parseInt(pPrice.value), img = pImage.value.trim() || currentImageData;
+  if(!name ||!price){ alert('Enter Name & Price'); return; }
+  if(!img){ img = 'https://images.unsplash.com/photo-1547592180-85f173990554?w=400'; }
+  products.push({id:Date.now(), name, price, img});
+  localStorage.setItem('hotel_products', JSON.stringify(products));
+  pName.value=''; pPrice.value=''; pImage.value=''; pFile.value=''; preview.style.display='none'; currentImageData='';
+  renderHotelList(); renderCustomerMenu();
+  alert(name + ' added!');
+}
+function renderHotelList(){
+  count.innerText = products.length;
+  if(products.length==0){ hotelMenuList.innerHTML='No products yet'; return; }
+  let h=''; products.forEach(p=>{ h+=`<div style="display:flex; justify-content:space-between; align-items:center; margin:5px 0; border-bottom:1px solid #ddd; padding:5px 0;">${p.name} - Ksh ${p.price} <button class="red" onclick="deleteProd(${p.id})">X</button></div>` });
+  hotelMenuList.innerHTML=h;
+}
+function deleteProd(id){
+  products = products.filter(p=>p.id!=id);
+  localStorage.setItem('hotel_products', JSON.stringify(products));
+  renderHotelList(); renderCustomerMenu();
+}
+function renderCustomerMenu(){
+  let div = document.getElementById('customerMenu');
+  if(products.length==0){ div.innerHTML='<p style="grid-column:1/3; text-align:center; color:#999;">Hotel has not added food yet. Go to Manage Menu.</p>'; return; }
+  let h=''; products.forEach(p=>{
+    h+=`<div class="food-item"><img src="${p.img}"><div>${p.name}</div><div class="price">Ksh ${p.price}</div><button onclick="addOrder('${p.name}',${p.price})">Add</button></div>`;
+  });
+  div.innerHTML=h;
+}
+function addOrder(name, price){
+  if(!custName.value){ alert('Enter Customer Name'); return; }
+  orders.push({name, price}); total+=price; renderOrders();
+}
+function renderOrders(){
+  if(orders.length==0){ orderList.innerHTML='No orders yet'; total=0; }
+  else { let html=''; orders.forEach((o,i)=> html+=`${i+1}. ${o.name} - ${o.price}<br>`); orderList.innerHTML=html; }
+  document.getElementById('total').innerText='Total: Ksh '+total;
+}
+function placeOrder(){
+  if(orders.length==0){ alert('Add food'); return; }
+  alert(`ORDER SENT!\nHotel: ${localStorage.getItem('hotelName')}\nCustomer: ${custName.value}\nTable: ${tableNo.value}\nTotal: Ksh ${total}\n\nWill be sent to: ${localStorage.getItem('hotelPhone')}`);
+  orders=[]; total=0; renderOrders(); custName.value=''; tableNo.value='';
+}
+function logout(){ dashPage.classList.add('hidden'); loginPage.classList.remove('hidden'); }
+
+// Auto login
+let saved = localStorage.getItem('hotelName');
+if(saved) showDash(saved, localStorage.getItem('hotelPhone'));
+</script>
+</body>
+</html>
