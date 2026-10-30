@@ -38,7 +38,9 @@ Never commit either value. `.env.example` documents the contract and `.gitignore
 
 ## Vercel Hobby deployment
 
-Import the GitHub repository `KiptooRyan/me-time-online-service` into Vercel, choose the Hobby plan, and add the two Turso environment variables for Preview and Production. The committed `vercel.json` rewrites `/api/*` to the Vercel Function in `api/index.js`; the HTML, CSS, and browser script remain static assets. After deployment, verify `/api/health` returns `{ "ok": true, "database": "turso" }`.
+Import the GitHub repository `KiptooRyan/me-time-online-service` into Vercel, choose the Hobby plan, and add the two Turso environment variables for Preview and Production. The committed `vercel.json` rewrites `/api/*` to the Vercel Function in `api/index.js`; the HTML, CSS, and browser script remain static assets. After deployment, verify `/api/health` returns `{ "ok": true, "database": "turso", "connection": "ok" }`.
+
+The health endpoint executes a real `SELECT 1` connection check. If a customer page says `Hotel not found`, that is not a Turso connection failure: use the exact slug returned by `GET /api/hotels` or the slug shown in the hotel portal, for example `/customer.html?hotel=sinkoro`. The production database is not seeded with the local `saffron-garden` demo hotel.
 
 If using the Vercel CLI after authentication:
 

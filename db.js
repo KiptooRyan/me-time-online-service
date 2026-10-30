@@ -5,18 +5,27 @@ const { createClient } = require('@libsql/client');
 let client;
 let schemaPromise;
 
+function envValue(name) {
+  return String(process.env[name] || '').trim().replace(/^['"]|['"]$/g, '');
+}
+
+function tursoConfig() {
+  return { url: envValue('TURSO_DATABASE_URL'), authToken: envValue('TURSO_AUTH_TOKEN') };
+}
+
 function getClient() {
   if (client) return client;
 
-  if (process.env.TURSO_DATABASE_URL || process.env.TURSO_AUTH_TOKEN) {
-    if (!process.env.TURSO_DATABASE_URL || !process.env.TURSO_AUTH_TOKEN) {
+  const turso = tursoConfig();
+  if (turso.url || turso.authToken) {
+    if (!turso.url || !turso.authToken) {
       const error = new Error('Turso requires both TURSO_DATABASE_URL and TURSO_AUTH_TOKEN.');
       error.code = 'DATABASE_NOT_CONFIGURED';
       throw error;
     }
     client = createClient({
-      url: process.env.TURSO_DATABASE_URL,
-      authToken: process.env.TURSO_AUTH_TOKEN,
+      url: turso.url,
+      authToken: turso.authToken,
     });
     return client;
   }
@@ -92,9 +101,19 @@ async function seedLocalDemo() {
 async function ensureSchema() {
   if (!schemaPromise) {
     schemaPromise = (async () => {
-      const db = getClient();
-      for (const sql of schemaStatements) await db.execute(sql);
-      await seedLocalDemo();
+      let lastError;
+      for (let attempt = 1; attempt <= 3; attempt += 1) {
+        try {
+          const db = getClient();
+          for (const sql of schemaStatements) await db.execute(sql);
+          await seedLocalDemo();
+          return;
+        } catch (error) {
+          lastError = error;
+          if (attempt < 3) await new Promise((resolve) => setTimeout(resolve, attempt * 150));
+        }
+      }
+      throw lastError;
     })().catch((error) => {
       schemaPromise = undefined;
       throw error;

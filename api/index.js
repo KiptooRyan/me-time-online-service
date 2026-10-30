@@ -119,7 +119,8 @@ async function routes(req, res, db) {
   const idPart = parts[1];
 
   if (req.method === 'GET' && resource === 'health') {
-    return send(res, 200, { ok: true, database: process.env.TURSO_DATABASE_URL ? 'turso' : 'local-file', time: now() });
+    await db.execute('SELECT 1 AS connected');
+    return send(res, 200, { ok: true, database: process.env.TURSO_DATABASE_URL ? 'turso' : 'local-file', connection: 'ok', time: now() });
   }
 
   if (resource === 'hotels' && req.method === 'GET') {
@@ -240,8 +241,9 @@ module.exports = async function handler(req, res) {
     const db = await ensureSchema();
     return await routes(req, res, db);
   } catch (error) {
-    const status = error.status || (error.code === 'DATABASE_NOT_CONFIGURED' ? 503 : 500);
+    const databaseFailure = error.code === 'DATABASE_NOT_CONFIGURED' || /turso|libsql|database|connection|fetch failed|socket/i.test(error.message || '');
+    const status = error.status || (databaseFailure ? 503 : 500);
     if (status >= 500) console.error(error);
-    return send(res, status, { error: error.message || 'Unexpected server error.', code: error.code || 'INTERNAL_ERROR' });
+    return send(res, status, { error: error.message || 'Unexpected server error.', code: error.code || (databaseFailure ? 'DATABASE_UNAVAILABLE' : 'INTERNAL_ERROR') });
   }
 };
