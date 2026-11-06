@@ -88,6 +88,7 @@
             <form id="product-form" class="form-grid" style="margin-top:20px">
               <div class="field"><label for="product-name">Product name</label><input id="product-name" required placeholder="e.g. Grilled tilapia plate"></div>
               <div class="form-grid" style="grid-template-columns:1fr 1fr"><div class="field"><label for="product-price">Price (Ksh)</label><input id="product-price" required min="0" step="1" type="number" placeholder="1450"></div><div class="field"><label for="product-image">Custom image URL (optional)</label><input id="product-image" type="url" placeholder="https://…"></div></div>
+              <div class="field"><label for="product-photo">Add a photo from your device (optional)</label><input id="product-photo" type="file" accept="image/jpeg,image/png,image/webp,image/*"><div id="product-photo-preview" class="photo-preview" hidden></div></div>
               <label class="context-chip" style="width:max-content; cursor:pointer"><input id="product-auto-image" type="checkbox" checked style="width:auto; margin:0"> Generate a menu image from the product name</label>
               <button class="btn btn-primary" type="submit">Add to hotel menu</button>
             </form>

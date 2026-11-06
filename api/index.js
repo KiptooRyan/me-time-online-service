@@ -156,7 +156,7 @@ async function routes(req, res, db) {
     const hotel = await hotelByKey(db, input.hotelId || input.hotel);
     const name = text(input.name, 'Product name');
     const price = integer(input.price, 'Price');
-    const imageUrl = optionalText(input.imageUrl, 1000);
+    const imageUrl = optionalText(input.imageUrl, 600000);
     const row = { id: id('product'), hotel_id: hotel.id, name, price, image_url: imageUrl, created_at: now() };
     await db.execute({ sql: 'INSERT INTO products (id, hotel_id, name, price, image_url, created_at) VALUES (?, ?, ?, ?, ?, ?)', args: [row.id, row.hotel_id, row.name, row.price, row.image_url, row.created_at] });
     return send(res, 201, { product: productView(row) });

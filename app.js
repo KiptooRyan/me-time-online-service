@@ -21,6 +21,27 @@ function generatedMenuImage(name) {
   const prompt = `appetizing professional editorial food photograph of ${name}, freshly plated for a boutique hotel menu, natural window light, warm neutral table, shallow depth of field, no text, no logos`;
   return `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=768&height=512&nologo=true&seed=${imageSeed(name)}`;
 }
+function compressPhoto(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Could not read that photo. Please try another image.'));
+    reader.onload = () => {
+      const image = new Image();
+      image.onerror = () => reject(new Error('That file is not a readable image.'));
+      image.onload = () => {
+        const max = 1000;
+        const scale = Math.min(1, max / Math.max(image.width, image.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(image.width * scale));
+        canvas.height = Math.max(1, Math.round(image.height * scale));
+        canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', .82));
+      };
+      image.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 function slugFromQuery() { return new URLSearchParams(location.search).get('hotel'); }
 function getSession() { try { return JSON.parse(localStorage.getItem(sessionKey) || 'null'); } catch { return null; } }
 function setSession(hotel) { localStorage.setItem(sessionKey, JSON.stringify(hotel)); }
@@ -154,11 +175,20 @@ async function initHotelPortal() {
     try {
       const productName = $('#product-name').value.trim();
       const customImage = $('#product-image').value.trim();
-      const imageUrl = customImage || ($('#product-auto-image').checked ? generatedMenuImage(productName) : '');
+      const photoFile = $('#product-photo').files[0];
+      const uploadedPhoto = photoFile ? await compressPhoto(photoFile) : '';
+      const imageUrl = uploadedPhoto || customImage || ($('#product-auto-image').checked ? generatedMenuImage(productName) : '');
       await api('products', { method: 'POST', body: { hotelId: hotel.id, name: productName, price: Number($('#product-price').value), imageUrl } });
-      form.reset(); showNotice($('#dashboard-notice'), 'Menu item added.', 'success'); loadDashboard();
+      form.reset(); if (photoPreview) { photoPreview.replaceChildren(); photoPreview.hidden = true; } showNotice($('#dashboard-notice'), 'Menu item added.', 'success'); loadDashboard();
     } catch (error) { showNotice($('#dashboard-notice'), error.message); }
     finally { button.disabled = false; }
+  });
+
+  const photoInput = $('#product-photo'); const photoPreview = $('#product-photo-preview');
+  photoInput?.addEventListener('change', () => {
+    const file = photoInput.files[0]; if (!file || !photoPreview) return;
+    const image = document.createElement('img'); image.alt = 'Selected menu photo'; image.src = URL.createObjectURL(file);
+    photoPreview.replaceChildren(image); photoPreview.hidden = false;
   });
 
   $$('.rail-nav button').forEach((button) => button.addEventListener('click', () => {
